@@ -62,9 +62,9 @@ func TestConnectionReading_Ok(t *testing.T) {
 	p := newMockPort()
 	inputChan := make(chan string)
 	conn, outputChan, err := gocomm.NewConnection(&p, inputChan, 0, "\n", "\n")
+	assert.Nil(t, err)
 	defer conn.Close()
 
-	assert.Nil(t, err)
 	testMsg := "Hello\n"
 	go func() {
 		for i := 0; i < len(testMsg); i++ {
@@ -79,8 +79,9 @@ func TestConnectionWriting_Ok(t *testing.T) {
 	p := newMockPort()
 	inputChan := make(chan string)
 	conn, _, err := gocomm.NewConnection(&p, inputChan, 0, "\n", "\n")
-	defer conn.Close()
 	assert.Nil(t, err)
+	defer conn.Close()
+
 	testMsg := "Hello"
 	go func() {
 		inputChan <- testMsg

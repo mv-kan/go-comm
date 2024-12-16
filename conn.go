@@ -9,7 +9,7 @@ import (
 )
 
 type Connection interface {
-	Close()
+	Close() error
 }
 type conn struct {
 	p                 Port
@@ -42,11 +42,11 @@ func NewConnection(
 	go c.writing(input, msgChan, writeInterval, delimWrite)
 	return &c, msgChan, nil
 }
-func (c *conn) Close() {
+func (c *conn) Close() error {
 	c.reconnMu.Lock()
 	defer c.reconnMu.Unlock()
 	close(c.done)
-	c.p.Close()
+	return c.p.Close()
 }
 func (c *conn) reconnecting(
 	msgChan chan<- Message,
