@@ -13,6 +13,7 @@ type Connection interface {
 }
 type conn struct {
 	p                 Port
+	isClosing         bool
 	reconnMu          sync.Mutex
 	reconnRequestChan chan time.Time
 	done              chan struct{}
@@ -45,6 +46,7 @@ func NewConnection(
 func (c *conn) Close() error {
 	c.reconnMu.Lock()
 	defer c.reconnMu.Unlock()
+	c.isClosing = true
 	close(c.done)
 	return c.p.Close()
 }
@@ -161,6 +163,9 @@ func (c *conn) writing(
 }
 
 func (c *conn) sendReconnReq(msgChan chan<- Message, err error) {
+	if c.isClosing {
+		return
+	}
 	now := time.Now()
 	log.Printf("sendReconnReq, now=%v", now)
 	c.reconnMu.Lock()
